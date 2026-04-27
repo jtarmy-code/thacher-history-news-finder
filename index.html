@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thacher U.S. History News Finder</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --g: #1a3a0a; --g-mid: #2d5016; --gold: #b07d2a; --gold-light: #d4a852;
+    --td: #141410; --tm: #3a3a34; --tmut: #7a7a70;
+    --brd: rgba(0,0,0,0.12); --cbg: #ffffff; --bg: #f5f0e8;
+    --gnf: #fdf8ee; --gnf-brd: #d4b86a; --gnf-text: #5a4200;
+  }
+  body { font-family: 'Source Sans 3', sans-serif; background: var(--bg); color: var(--td); min-height: 100vh; }
+
+  header { background: var(--g); color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 16px rgba(0,0,0,0.35); }
+
+  .header-top { display: flex; align-items: stretch; gap: 0; padding: 0 36px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .header-side { width: 200px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; padding: 14px 0; }
+  .header-side.right { align-items: flex-end; }
+  .header-date-day { font-size: 11px; color: rgba(255,255,255,0.45); letter-spacing: 0.1em; text-transform: uppercase; }
+  .header-date-full { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 2px; font-family: 'EB Garamond', serif; font-style: italic; }
+  .edition { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 0.08em; text-transform: uppercase; }
+  .edition span { color: var(--gold-light); }
+  .byline-header { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 4px; line-height: 1.5; }
+  .byline-header em { font-style: italic; color: var(--gold-light); font-family: 'EB Garamond', serif; letter-spacing: 0; text-transform: none; font-size: 12px; }
+
+  .masthead { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 14px 24px 12px; border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); }
+  .masthead-rule { width: 100%; height: 1px; background: var(--gold); margin-bottom: 5px; }
+  .masthead h1 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: white; letter-spacing: 0.03em; line-height: 1.1; text-align: center; }
+  .masthead-sub { font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 0.2em; text-transform: uppercase; margin-top: 4px; text-align: center; }
+  .masthead-rule2 { width: 100%; height: 1px; background: var(--gold); margin-top: 5px; }
+
+  .gnf-bar { background: var(--g-mid); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 9px 36px; display: flex; align-items: center; gap: 14px; transition: background 0.3s; }
+  .gnf-bar.on { background: #3d2800; border-bottom: 2px solid var(--gnf-brd); }
+  .gnf-label { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.55); letter-spacing: 0.1em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; white-space: nowrap; transition: color 0.3s; }
+  .gnf-label.on { color: var(--gold-light); }
+  .gnf-divider { width: 1px; height: 16px; background: rgba(255,255,255,0.15); }
+  .gnf-desc { font-size: 12px; color: rgba(255,255,255,0.35); font-family: 'EB Garamond', serif; font-style: italic; transition: color 0.3s; }
+  .gnf-desc.on { color: rgba(212,168,82,0.75); }
+  .toggle-wrap { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .toggle-status { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.35); letter-spacing: 0.1em; text-transform: uppercase; transition: color 0.3s; }
+  .toggle-status.on { color: var(--gold-light); }
+  .toggle { position: relative; width: 44px; height: 24px; cursor: pointer; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-track { position: absolute; inset: 0; border-radius: 12px; background: rgba(255,255,255,0.12); transition: background 0.25s; border: 1px solid rgba(255,255,255,0.2); }
+  .toggle input:checked + .toggle-track { background: var(--gold); border-color: var(--gold-light); }
+  .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.7); transition: transform 0.25s; }
+  .toggle input:checked ~ .toggle-thumb { transform: translateX(20px); background: white; }
+
+  .nav-bar { padding: 0 36px; display: flex; align-items: center; gap: 0; border-top: 1px solid rgba(255,255,255,0.06); overflow-x: auto; scrollbar-width: none; }
+  .nav-bar::-webkit-scrollbar { display: none; }
+  .nav-label { font-size: 10px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.14em; white-space: nowrap; flex-shrink: 0; font-weight: 600; padding-right: 16px; border-right: 1px solid rgba(255,255,255,0.1); margin-right: 4px; }
+  .chip { padding: 10px 16px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; border: none; background: transparent; color: rgba(255,255,255,0.5); font-family: 'Source Sans 3', sans-serif; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.18s; border-bottom: 2px solid transparent; position: relative; top: 1px; }
+  .chip:hover { color: rgba(255,255,255,0.8); }
+  .chip.active { color: var(--gold-light); border-bottom-color: var(--gold-light); }
+
+  .main { max-width: 1120px; margin: 0 auto; padding: 36px 28px 64px; }
+
+  .gnf-banner { background: var(--gnf); border: 1px solid var(--gnf-brd); border-left: 4px solid var(--gold); border-radius: 2px; padding: 16px 22px; margin-bottom: 28px; display: flex; align-items: center; gap: 16px; }
+  .gnf-banner-icon { font-size: 24px; flex-shrink: 0; }
+  .gnf-banner-text h3 { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--gnf-text); margin-bottom: 3px; font-weight: 600; }
+  .gnf-banner-text p { font-size: 13px; color: #7a6020; font-family: 'EB Garamond', serif; font-style: italic; line-height: 1.5; }
+
+  .section-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 10px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 11px; font-weight: 600; color: var(--g-mid); letter-spacing: 0.2em; text-transform: uppercase; }
+  .section-sub { font-size: 12px; color: var(--tmut); font-family: 'EB Garamond', serif; font-style: italic; }
+  .refresh-btn { margin-left: auto; padding: 5px 14px; border-radius: 2px; border: 1px solid var(--g-mid); background: transparent; color: var(--g-mid); font-size: 11px; font-weight: 600; cursor: pointer; font-family: 'Source Sans 3', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.18s; }
+  .refresh-btn:hover { background: var(--g-mid); color: white; }
+
+  .divider { height: 1px; background: var(--g); margin-bottom: 4px; }
+  .divider-thin { height: 1px; background: var(--brd); margin-bottom: 24px; }
+  .divider-gnf { background: var(--gold); }
+
+  .featured-grid { display: grid; grid-template-columns: 1.65fr 1fr; gap: 0; border: 1px solid var(--brd); background: var(--cbg); }
+  .featured-main { border-right: 1px solid var(--brd); }
+  .card { background: var(--cbg); overflow: hidden; transition: background 0.18s; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; }
+  .card:hover { background: #fafaf6; }
+  .card.gnf-card:hover { background: #fffcf0; }
+
+  .card-featured { padding: 28px 30px 24px; }
+  .topic-flag { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--g-mid); margin-bottom: 14px; }
+  .topic-flag::before { content: ''; display: inline-block; width: 20px; height: 2px; background: var(--g-mid); }
+  .topic-flag.gnf-flag { color: var(--gold); }
+  .topic-flag.gnf-flag::before { background: var(--gold); }
+  .card-featured h2 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; line-height: 1.25; color: var(--td); margin-bottom: 14px; }
+  .card-featured .summary { font-family: 'EB Garamond', serif; font-size: 17px; color: var(--tm); line-height: 1.7; margin-bottom: 20px; }
+  .card-meta { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--tmut); margin-top: auto; padding-top: 16px; border-top: 1px solid var(--brd); font-family: 'Source Sans 3', sans-serif; letter-spacing: 0.04em; }
+  .source-name { font-weight: 600; color: var(--tm); text-transform: uppercase; font-size: 11px; letter-spacing: 0.1em; }
+  .meta-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--tmut); flex-shrink: 0; }
+
+  .secondary-stack { display: flex; flex-direction: column; }
+  .card-small { padding: 20px 22px; flex: 1; border-bottom: 1px solid var(--brd); }
+  .card-small:last-child { border-bottom: none; }
+  .card-small h3 { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; line-height: 1.35; color: var(--td); margin-bottom: 8px; margin-top: 10px; }
+  .card-small .summary { font-family: 'EB Garamond', serif; font-size: 15px; color: var(--tm); line-height: 1.6; margin-bottom: 12px; }
+  .card-small .card-meta { padding-top: 10px; }
+
+  .more-section { margin-top: 2px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--brd); border-top: none; background: var(--cbg); }
+  .card-medium { padding: 22px 24px; border-right: 1px solid var(--brd); }
+  .card-medium:last-child { border-right: none; }
+  .card-medium h3 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; line-height: 1.3; color: var(--td); margin-bottom: 8px; margin-top: 10px; }
+  .card-medium .summary { font-family: 'EB Garamond', serif; font-size: 15px; color: var(--tm); line-height: 1.6; margin-bottom: 12px; }
+  .card-medium .card-meta { padding-top: 12px; border-top: 1px solid var(--brd); }
+
+  .loading-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 0; gap: 16px; }
+  .spinner { width: 28px; height: 28px; border: 2px solid rgba(26,58,10,0.15); border-top-color: var(--g-mid); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .spinner.gnf { border-top-color: var(--gold); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 14px; color: var(--tmut); font-family: 'EB Garamond', serif; font-style: italic; }
+  .error-wrap { text-align: center; padding: 60px; color: var(--tmut); font-family: 'EB Garamond', serif; }
+
+  footer { background: var(--g); color: rgba(255,255,255,0.4); text-align: center; padding: 22px 20px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; border-top: 3px solid var(--gold); line-height: 2; }
+  footer strong { color: rgba(255,255,255,0.7); }
+  footer em { font-style: italic; color: var(--gold-light); text-transform: none; letter-spacing: 0; font-family: 'EB Garamond', serif; font-size: 13px; }
+
+  @media (max-width: 700px) {
+    .featured-grid { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr; }
+    .header-top, .gnf-bar, .nav-bar { padding-left: 16px; padding-right: 16px; }
+    .main { padding: 20px 16px 40px; }
+    .header-side { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="header-side">
+      <div class="edition">Est. <span>1889</span></div>
+      <div class="header-date-day" id="headerDay"></div>
+      <div class="byline-header">Created by<br><em>Honors U.S. History</em></div>
+    </div>
+    <div class="masthead">
+      <div class="masthead-rule"></div>
+      <h1>Thacher U.S. History<br>News Finder</h1>
+      <div class="masthead-sub">The Thacher School &nbsp;·&nbsp; Ojai, California</div>
+      <div class="masthead-rule2"></div>
+    </div>
+    <div class="header-side right">
+      <div class="header-date-full" id="headerDate"></div>
+      <div class="byline-header" style="margin-top:6px; text-align:right;">Honors U.S. History<br><em>Thacher School</em></div>
+    </div>
+  </div>
+
+  <div class="gnf-bar" id="gnfBar">
+    <span class="gnf-label" id="gnfLabel">☀️ Good News Friday</span>
+    <div class="gnf-divider"></div>
+    <span class="gnf-desc" id="gnfDesc">Positive stories only</span>
+    <div class="toggle-wrap">
+      <span class="toggle-status" id="toggleStatus">Off</span>
+      <label class="toggle">
+        <input type="checkbox" id="gnfToggle">
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+    </div>
+  </div>
+
+  <div class="nav-bar">
+    <span class="nav-label">Section</span>
+    <button class="chip active" data-topic="world" data-label="World News">World News</button>
+    <button class="chip" data-topic="science" data-label="Science & Nature">Science & Nature</button>
+    <button class="chip" data-topic="technology" data-label="Technology">Technology</button>
+    <button class="chip" data-topic="entertainment" data-label="Arts & Culture">Arts & Culture</button>
+    <button class="chip" data-topic="sports" data-label="Sports">Sports</button>
+    <button class="chip" data-topic="environment" data-label="Environment">Environment</button>
+    <button class="chip" data-topic="politics" data-label="Politics">Politics</button>
+    <button class="chip" data-topic="business" data-label="Business">Business</button>
+    <button class="chip" data-topic="health" data-label="Health">Health</button>
+    <button class="chip" data-topic="science" data-label="Space & Astronomy">Space & Astronomy</button>
+  </div>
+</header>
+
+<div class="main" id="mainContent">
+  <div class="loading-wrap">
+    <div class="spinner"></div>
+    <div class="loading-text">Preparing today's edition…</div>
+  </div>
+</div>
+
+<footer>
+  <strong>Thacher U.S. History News Finder</strong><br>
+  <em>Created by Honors U.S. History Students · The Thacher School</em><br>
+  5025 Thacher Road, Ojai, CA 93023 &nbsp;·&nbsp; Powered by Currents API
+</footer>
+
+<script>
+  const API_KEY = 'df7TWcXjOrhkfVtO1QusX_Rrhy70GzQedUvuTaYpJ69pVVVr';
+
+  const now = new Date();
+  document.getElementById('headerDate').textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  document.getElementById('headerDay').textContent = now.toLocaleDateString('en-US', { weekday: 'long' });
+
+  let activeTopic = 'world';
+  let activeLabel = 'World News';
+  let gnfOn = false;
+
+  const gnfToggle = document.getElementById('gnfToggle');
+  const gnfBar = document.getElementById('gnfBar');
+  const gnfLabel = document.getElementById('gnfLabel');
+  const gnfDesc = document.getElementById('gnfDesc');
+  const toggleStatus = document.getElementById('toggleStatus');
+
+  gnfToggle.addEventListener('change', () => {
+    gnfOn = gnfToggle.checked;
+    if (gnfOn) {
+      gnfBar.classList.add('on');
+      gnfLabel.classList.add('on');
+      gnfDesc.classList.add('on');
+      gnfDesc.textContent = 'Uplifting and inspiring stories only';
+      toggleStatus.textContent = 'On';
+      toggleStatus.classList.add('on');
+    } else {
+      gnfBar.classList.remove('on');
+      gnfLabel.classList.remove('on');
+      gnfDesc.classList.remove('on');
+      gnfDesc.textContent = 'Positive stories only';
+      toggleStatus.textContent = 'Off';
+      toggleStatus.classList.remove('on');
+    }
+    fetchNews();
+  });
+
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeTopic = chip.dataset.topic;
+      activeLabel = chip.dataset.label;
+      fetchNews();
+    });
+  });
+
+  function timeAgo(dateStr) {
+    if (!dateStr) return 'Today';
+    const pub = new Date(dateStr);
+    const diffMs = Date.now() - pub.getTime();
+    const diffH = Math.floor(diffMs / 3600000);
+    if (diffH < 1) return 'Just now';
+    if (diffH < 24) return diffH + ' hour' + (diffH > 1 ? 's' : '') + ' ago';
+    const diffD = Math.floor(diffH / 24);
+    return diffD + ' day' + (diffD > 1 ? 's' : '') + ' ago';
+  }
+
+  function cleanDescription(desc) {
+    if (!desc) return '';
+    return desc.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').substring(0, 220) + '…';
+  }
+
+  function filterGoodNews(articles) {
+    const badWords = ['dead', 'death', 'kill', 'killed', 'murder', 'crash', 'war', 'attack', 'shooting', 'disaster', 'flood', 'fire', 'crisis', 'scandal', 'arrest', 'guilty', 'lawsuit', 'explosion', 'violence', 'terror', 'riot', 'protest', 'controversy', 'resign', 'impeach', 'bankrupt', 'collapse', 'fail', 'tragedy', 'victim'];
+    return articles.filter(a => {
+      const text = ((a.title || '') + ' ' + (a.description || '')).toLowerCase();
+      return !badWords.some(w => text.includes(w));
+    });
+  }
+
+  async function fetchNews() {
+    const main = document.getElementById('mainContent');
+    main.innerHTML = `<div class="loading-wrap"><div class="spinner ${gnfOn ? 'gnf' : ''}"></div><div class="loading-text">${gnfOn ? 'Curating uplifting stories…' : 'Preparing today\'s edition…'}</div></div>`;
+
+    const keywords = gnfOn ? 'breakthrough+discovery+achievement+innovation+inspire' : activeTopic;
+    const url = `https://api.currentsapi.services/v1/search?apiKey=${API_KEY}&language=en&keywords=${keywords}&page_size=20`;
+
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error('API error ' + resp.status);
+      const data = await resp.json();
+      let articles = data.news || [];
+
+      if (gnfOn) articles = filterGoodNews(articles);
+      articles = articles.filter(a => a.title && a.title.length > 20).slice(0, 9);
+
+      if (articles.length === 0) {
+        main.innerHTML = '<div class="error-wrap">No articles found for this section. Try another topic.</div>';
+        return;
+      }
+
+      renderArticles(articles);
+    } catch (err) {
+      console.error(err);
+      main.innerHTML = `<div class="error-wrap"><p style="margin-bottom:12px;">Unable to retrieve today's edition.<br><small style="font-size:12px;">${err.message}</small></p><button class="refresh-btn" onclick="fetchNews()" style="margin:0 auto;">↻ Try Again</button></div>`;
+    }
+  }
+
+  function renderArticles(articles) {
+    const main = document.getElementById('mainContent');
+    const isGnf = gnfOn;
+    const featured = articles[0];
+    const secondary = articles.slice(1, 3);
+    const rest = articles.slice(3, 9);
+    const flagClass = isGnf ? 'gnf-flag' : '';
+    const cardClass = isGnf ? 'gnf-card' : '';
+    const divClass = isGnf ? 'divider-gnf' : '';
+
+    let html = '';
+
+    if (isGnf) {
+      html += `<div class="gnf-banner">
+        <div class="gnf-banner-icon">☀️</div>
+        <div class="gnf-banner-text">
+          <h3>Good News Friday Edition</h3>
+          <p>Today's edition features only uplifting, positive, and inspiring stories from around the world.</p>
+        </div>
+      </div>`;
+    }
+
+    html += `
+      <div class="section-header">
+        <span class="section-title">${isGnf ? 'Good News · ' : ''}${activeLabel}</span>
+        <span class="section-sub">${articles.length} stories</span>
+        <button class="refresh-btn" onclick="fetchNews()">↻ Refresh</button>
+      </div>
+      <div class="divider ${divClass}"></div>
+      <div class="divider-thin"></div>
+      <div class="featured-grid">
+        <div class="featured-main">
+          <a class="card ${cardClass}" href="${featured.url || '#'}" target="_blank" rel="noopener">
+            <div class="card-featured">
+              <div class="topic-flag ${flagClass}">${(featured.category && featured.category[0]) || activeLabel}</div>
+              <h2>${featured.title}</h2>
+              <p class="summary">${cleanDescription(featured.description)}</p>
+              <div class="card-meta">
+                <span class="source-name">${featured.author || 'News'}</span>
+                <div class="meta-dot"></div>
+                <span>${timeAgo(featured.published)}</span>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="secondary-stack">
+          ${secondary.map(a => `
+            <a class="card ${cardClass}" href="${a.url || '#'}" target="_blank" rel="noopener" style="flex:1">
+              <div class="card-small">
+                <div class="topic-flag ${flagClass}" style="font-size:9px;">${(a.category && a.category[0]) || activeLabel}</div>
+                <h3>${a.title}</h3>
+                <p class="summary">${cleanDescription(a.description)}</p>
+                <div class="card-meta">
+                  <span class="source-name">${a.author || 'News'}</span>
+                  <div class="meta-dot"></div>
+                  <span>${timeAgo(a.published)}</span>
+                </div>
+              </div>
+            </a>
+          `).join('')}
+        </div>
+      </div>`;
+
+    if (rest.length > 0) {
+      html += `
+        <div class="more-section">
+          <div class="divider ${divClass}" style="margin-top:28px;"></div>
+          <div class="divider-thin"></div>
+          <div class="grid-3">
+            ${rest.map(a => `
+              <a class="card ${cardClass}" href="${a.url || '#'}" target="_blank" rel="noopener">
+                <div class="card-medium">
+                  <div class="topic-flag ${flagClass}" style="font-size:9px;">${(a.category && a.category[0]) || activeLabel}</div>
+                  <h3>${a.title}</h3>
+                  <p class="summary">${cleanDescription(a.description)}</p>
+                  <div class="card-meta">
+                    <span class="source-name">${a.author || 'News'}</span>
+                    <div class="meta-dot"></div>
+                    <span>${timeAgo(a.published)}</span>
+                  </div>
+                </div>
+              </a>
+            `).join('')}
+          </div>
+        </div>`;
+    }
+
+    main.innerHTML = html;
+  }
+
+  fetchNews();
+</script>
+</body>
+</html>
