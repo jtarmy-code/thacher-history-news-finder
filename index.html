@@ -4,381 +4,256 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Thacher U.S. History News Finder</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=EB+Garamond:ital,wght@0,400;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --g: #1a3a0a; --g-mid: #2d5016; --gold: #b07d2a; --gold-light: #d4a852;
-    --td: #141410; --tm: #3a3a34; --tmut: #7a7a70;
-    --brd: rgba(0,0,0,0.12); --cbg: #ffffff; --bg: #f5f0e8;
-    --gnf: #fdf8ee; --gnf-brd: #d4b86a; --gnf-text: #5a4200;
-  }
-  body { font-family: 'Source Sans 3', sans-serif; background: var(--bg); color: var(--td); min-height: 100vh; }
-
-  header { background: var(--g); color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 16px rgba(0,0,0,0.35); }
-
-  .header-top { display: flex; align-items: stretch; gap: 0; padding: 0 36px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-  .header-side { width: 200px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; padding: 14px 0; }
-  .header-side.right { align-items: flex-end; }
-  .header-date-day { font-size: 11px; color: rgba(255,255,255,0.45); letter-spacing: 0.1em; text-transform: uppercase; }
-  .header-date-full { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 2px; font-family: 'EB Garamond', serif; font-style: italic; }
-  .edition { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 0.08em; text-transform: uppercase; }
-  .edition span { color: var(--gold-light); }
-  .byline-header { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 4px; line-height: 1.5; }
-  .byline-header em { font-style: italic; color: var(--gold-light); font-family: 'EB Garamond', serif; letter-spacing: 0; text-transform: none; font-size: 12px; }
-
-  .masthead { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 14px 24px 12px; border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); }
-  .masthead-rule { width: 100%; height: 1px; background: var(--gold); margin-bottom: 5px; }
-  .masthead h1 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: white; letter-spacing: 0.03em; line-height: 1.1; text-align: center; }
-  .masthead-sub { font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 0.2em; text-transform: uppercase; margin-top: 4px; text-align: center; }
-  .masthead-rule2 { width: 100%; height: 1px; background: var(--gold); margin-top: 5px; }
-
-  .gnf-bar { background: var(--g-mid); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 9px 36px; display: flex; align-items: center; gap: 14px; transition: background 0.3s; }
-  .gnf-bar.on { background: #3d2800; border-bottom: 2px solid var(--gnf-brd); }
-  .gnf-label { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.55); letter-spacing: 0.1em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; white-space: nowrap; transition: color 0.3s; }
-  .gnf-label.on { color: var(--gold-light); }
-  .gnf-divider { width: 1px; height: 16px; background: rgba(255,255,255,0.15); }
-  .gnf-desc { font-size: 12px; color: rgba(255,255,255,0.35); font-family: 'EB Garamond', serif; font-style: italic; transition: color 0.3s; }
-  .gnf-desc.on { color: rgba(212,168,82,0.75); }
-  .toggle-wrap { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-  .toggle-status { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.35); letter-spacing: 0.1em; text-transform: uppercase; transition: color 0.3s; }
-  .toggle-status.on { color: var(--gold-light); }
-  .toggle { position: relative; width: 44px; height: 24px; cursor: pointer; flex-shrink: 0; }
-  .toggle input { opacity: 0; width: 0; height: 0; }
-  .toggle-track { position: absolute; inset: 0; border-radius: 12px; background: rgba(255,255,255,0.12); transition: background 0.25s; border: 1px solid rgba(255,255,255,0.2); }
-  .toggle input:checked + .toggle-track { background: var(--gold); border-color: var(--gold-light); }
-  .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.7); transition: transform 0.25s; }
-  .toggle input:checked ~ .toggle-thumb { transform: translateX(20px); background: white; }
-
-  .nav-bar { padding: 0 36px; display: flex; align-items: center; gap: 0; border-top: 1px solid rgba(255,255,255,0.06); overflow-x: auto; scrollbar-width: none; }
-  .nav-bar::-webkit-scrollbar { display: none; }
-  .nav-label { font-size: 10px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.14em; white-space: nowrap; flex-shrink: 0; font-weight: 600; padding-right: 16px; border-right: 1px solid rgba(255,255,255,0.1); margin-right: 4px; }
-  .chip { padding: 10px 16px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; border: none; background: transparent; color: rgba(255,255,255,0.5); font-family: 'Source Sans 3', sans-serif; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.18s; border-bottom: 2px solid transparent; position: relative; top: 1px; }
-  .chip:hover { color: rgba(255,255,255,0.8); }
-  .chip.active { color: var(--gold-light); border-bottom-color: var(--gold-light); }
-
-  .main { max-width: 1120px; margin: 0 auto; padding: 36px 28px 64px; }
-
-  .gnf-banner { background: var(--gnf); border: 1px solid var(--gnf-brd); border-left: 4px solid var(--gold); border-radius: 2px; padding: 16px 22px; margin-bottom: 28px; display: flex; align-items: center; gap: 16px; }
-  .gnf-banner-icon { font-size: 24px; flex-shrink: 0; }
-  .gnf-banner-text h3 { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--gnf-text); margin-bottom: 3px; font-weight: 600; }
-  .gnf-banner-text p { font-size: 13px; color: #7a6020; font-family: 'EB Garamond', serif; font-style: italic; line-height: 1.5; }
-
-  .section-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 10px; }
-  .section-title { font-family: 'Playfair Display', serif; font-size: 11px; font-weight: 600; color: var(--g-mid); letter-spacing: 0.2em; text-transform: uppercase; }
-  .section-sub { font-size: 12px; color: var(--tmut); font-family: 'EB Garamond', serif; font-style: italic; }
-  .refresh-btn { margin-left: auto; padding: 5px 14px; border-radius: 2px; border: 1px solid var(--g-mid); background: transparent; color: var(--g-mid); font-size: 11px; font-weight: 600; cursor: pointer; font-family: 'Source Sans 3', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.18s; }
-  .refresh-btn:hover { background: var(--g-mid); color: white; }
-
-  .divider { height: 1px; background: var(--g); margin-bottom: 4px; }
-  .divider-thin { height: 1px; background: var(--brd); margin-bottom: 24px; }
-  .divider-gnf { background: var(--gold); }
-
-  .featured-grid { display: grid; grid-template-columns: 1.65fr 1fr; gap: 0; border: 1px solid var(--brd); background: var(--cbg); }
-  .featured-main { border-right: 1px solid var(--brd); }
-  .card { background: var(--cbg); overflow: hidden; transition: background 0.18s; cursor: pointer; text-decoration: none; display: flex; flex-direction: column; }
-  .card:hover { background: #fafaf6; }
-  .card.gnf-card:hover { background: #fffcf0; }
-
-  .card-featured { padding: 28px 30px 24px; }
-  .topic-flag { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--g-mid); margin-bottom: 14px; }
-  .topic-flag::before { content: ''; display: inline-block; width: 20px; height: 2px; background: var(--g-mid); }
-  .topic-flag.gnf-flag { color: var(--gold); }
-  .topic-flag.gnf-flag::before { background: var(--gold); }
-  .card-featured h2 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; line-height: 1.25; color: var(--td); margin-bottom: 14px; }
-  .card-featured .summary { font-family: 'EB Garamond', serif; font-size: 17px; color: var(--tm); line-height: 1.7; margin-bottom: 20px; }
-  .card-meta { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--tmut); margin-top: auto; padding-top: 16px; border-top: 1px solid var(--brd); font-family: 'Source Sans 3', sans-serif; letter-spacing: 0.04em; }
-  .source-name { font-weight: 600; color: var(--tm); text-transform: uppercase; font-size: 11px; letter-spacing: 0.1em; }
-  .meta-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--tmut); flex-shrink: 0; }
-
-  .secondary-stack { display: flex; flex-direction: column; }
-  .card-small { padding: 20px 22px; flex: 1; border-bottom: 1px solid var(--brd); }
-  .card-small:last-child { border-bottom: none; }
-  .card-small h3 { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; line-height: 1.35; color: var(--td); margin-bottom: 8px; margin-top: 10px; }
-  .card-small .summary { font-family: 'EB Garamond', serif; font-size: 15px; color: var(--tm); line-height: 1.6; margin-bottom: 12px; }
-  .card-small .card-meta { padding-top: 10px; }
-
-  .more-section { margin-top: 2px; }
-  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--brd); border-top: none; background: var(--cbg); }
-  .card-medium { padding: 22px 24px; border-right: 1px solid var(--brd); }
-  .card-medium:last-child { border-right: none; }
-  .card-medium h3 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; line-height: 1.3; color: var(--td); margin-bottom: 8px; margin-top: 10px; }
-  .card-medium .summary { font-family: 'EB Garamond', serif; font-size: 15px; color: var(--tm); line-height: 1.6; margin-bottom: 12px; }
-  .card-medium .card-meta { padding-top: 12px; border-top: 1px solid var(--brd); }
-
-  .loading-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 0; gap: 16px; }
-  .spinner { width: 28px; height: 28px; border: 2px solid rgba(26,58,10,0.15); border-top-color: var(--g-mid); border-radius: 50%; animation: spin 0.8s linear infinite; }
-  .spinner.gnf { border-top-color: var(--gold); }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-text { font-size: 14px; color: var(--tmut); font-family: 'EB Garamond', serif; font-style: italic; }
-  .error-wrap { text-align: center; padding: 60px; color: var(--tmut); font-family: 'EB Garamond', serif; }
-
-  footer { background: var(--g); color: rgba(255,255,255,0.4); text-align: center; padding: 22px 20px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; border-top: 3px solid var(--gold); line-height: 2; }
-  footer strong { color: rgba(255,255,255,0.7); }
-  footer em { font-style: italic; color: var(--gold-light); text-transform: none; letter-spacing: 0; font-family: 'EB Garamond', serif; font-size: 13px; }
-
-  @media (max-width: 700px) {
-    .featured-grid { grid-template-columns: 1fr; }
-    .grid-3 { grid-template-columns: 1fr; }
-    .header-top, .gnf-bar, .nav-bar { padding-left: 16px; padding-right: 16px; }
-    .main { padding: 20px 16px 40px; }
-    .header-side { display: none; }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--g:#1a3a0a;--g-mid:#2d5016;--gold:#b07d2a;--gold-light:#d4a852;--td:#141410;--tm:#3a3a34;--tmut:#7a7a70;--brd:rgba(0,0,0,0.12);--cbg:#ffffff;--bg:#f5f0e8;--gnf-bg:#fdf8ee;--gnf-brd:#d4b86a;--gnf-text:#5a4200}
+  body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--td);min-height:100vh}
+  header{background:var(--g);color:white;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.35)}
+  .hdr-top{display:flex;align-items:stretch;padding:0 32px;border-bottom:1px solid rgba(255,255,255,.1)}
+  .hdr-side{width:160px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center;padding:12px 0}
+  .hdr-side.r{align-items:flex-end}
+  .hdr-est{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:.08em;text-transform:uppercase}
+  .hdr-est span{color:var(--gold-light)}
+  .hdr-by{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:.05em;text-transform:uppercase;margin-top:3px;line-height:1.5}
+  .hdr-by em{font-style:italic;color:var(--gold-light);font-family:'EB Garamond',serif;letter-spacing:0;text-transform:none;font-size:11px}
+  .hdr-date{font-size:11px;color:rgba(255,255,255,.6);font-family:'EB Garamond',serif;font-style:italic}
+  .mast{flex:1;display:flex;flex-direction:column;align-items:center;padding:12px 20px 10px;border-left:1px solid rgba(255,255,255,.1);border-right:1px solid rgba(255,255,255,.1)}
+  .mast-rule{width:100%;height:1px;background:var(--gold);margin-bottom:5px}
+  .mast h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:white;letter-spacing:.03em;line-height:1.1;text-align:center}
+  .mast-sub{font-size:9px;color:rgba(255,255,255,.45);letter-spacing:.18em;text-transform:uppercase;margin-top:3px}
+  .gnf-bar{background:var(--g-mid);padding:8px 32px;display:flex;align-items:center;gap:12px;transition:background .3s;border-bottom:1px solid rgba(255,255,255,.08)}
+  .gnf-bar.on{background:#3d2800;border-bottom:2px solid var(--gnf-brd)}
+  .gnf-lbl{font-size:11px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;transition:color .3s}
+  .gnf-lbl.on{color:var(--gold-light)}
+  .gnf-sep{width:1px;height:13px;background:rgba(255,255,255,.15)}
+  .gnf-desc{font-size:11px;color:rgba(255,255,255,.3);font-family:'EB Garamond',serif;font-style:italic;transition:color .3s}
+  .gnf-desc.on{color:rgba(212,168,82,.7)}
+  .tog-wrap{margin-left:auto;display:flex;align-items:center;gap:9px}
+  .tog-st{font-size:10px;font-weight:600;color:rgba(255,255,255,.3);letter-spacing:.1em;text-transform:uppercase;transition:color .3s;min-width:20px}
+  .tog-st.on{color:var(--gold-light)}
+  .tog{position:relative;width:40px;height:22px;cursor:pointer;flex-shrink:0}
+  .tog input{opacity:0;width:0;height:0}
+  .tog-track{position:absolute;inset:0;border-radius:11px;background:rgba(255,255,255,.1);transition:background .25s;border:1px solid rgba(255,255,255,.2)}
+  .tog input:checked+.tog-track{background:var(--gold)}
+  .tog-thumb{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.65);transition:transform .25s}
+  .tog input:checked~.tog-thumb{transform:translateX(18px);background:white}
+  .nav{padding:0 32px;display:flex;align-items:center;overflow-x:auto;scrollbar-width:none;border-top:1px solid rgba(255,255,255,.06)}
+  .nav::-webkit-scrollbar{display:none}
+  .nav-lbl{font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;flex-shrink:0;font-weight:600;padding-right:14px;border-right:1px solid rgba(255,255,255,.1);margin-right:2px}
+  .chip{padding:9px 13px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;border:none;background:transparent;color:rgba(255,255,255,.45);font-family:'Source Sans 3',sans-serif;letter-spacing:.05em;text-transform:uppercase;transition:all .15s;border-bottom:2px solid transparent;position:relative;top:1px}
+  .chip:hover{color:rgba(255,255,255,.8)}
+  .chip.active{color:var(--gold-light);border-bottom-color:var(--gold-light)}
+  .main{max-width:1100px;margin:0 auto;padding:28px 28px 60px}
+  .gnf-banner{background:var(--gnf-bg);border:1px solid var(--gnf-brd);border-left:4px solid var(--gold);border-radius:3px;padding:14px 18px;margin-bottom:22px;display:flex;align-items:center;gap:14px}
+  .gnf-icon{font-size:20px;flex-shrink:0}
+  .gnf-banner h3{font-family:'Playfair Display',serif;font-size:15px;color:var(--gnf-text);margin-bottom:2px}
+  .gnf-banner p{font-size:13px;color:#7a6020;font-family:'EB Garamond',serif;font-style:italic;line-height:1.4}
+  .sec-hdr{display:flex;align-items:baseline;gap:12px;margin-bottom:8px}
+  .sec-title{font-family:'Playfair Display',serif;font-size:10px;font-weight:700;color:var(--g-mid);letter-spacing:.2em;text-transform:uppercase}
+  .sec-sub{font-size:11px;color:var(--tmut);font-family:'EB Garamond',serif;font-style:italic}
+  .ref-btn{margin-left:auto;padding:4px 12px;border-radius:3px;border:1px solid var(--g-mid);background:transparent;color:var(--g-mid);font-size:10px;font-weight:600;cursor:pointer;font-family:'Source Sans 3',sans-serif;letter-spacing:.08em;text-transform:uppercase;transition:all .15s}
+  .ref-btn:hover{background:var(--g-mid);color:white}
+  .div-line{height:1px;background:var(--g);margin-bottom:4px}
+  .div-thin{height:1px;background:var(--brd);margin-bottom:20px}
+  .div-gold{background:var(--gold)}
+  .feat-grid{display:grid;grid-template-columns:1.6fr 1fr;border:1px solid var(--brd);background:var(--cbg)}
+  .feat-main{border-right:1px solid var(--brd)}
+  .card{background:var(--cbg);overflow:hidden;transition:background .15s;cursor:pointer;text-decoration:none;display:flex;flex-direction:column;color:inherit}
+  .card:hover{background:#fafaf6}
+  .card-feat{padding:22px 24px 18px;display:flex;flex-direction:column;flex:1}
+  .card-img{width:100%;height:190px;object-fit:cover;display:block;flex-shrink:0}
+  .src-badge{display:inline-block;font-size:9px;font-weight:700;color:white;padding:2px 7px;border-radius:2px;letter-spacing:.04em;font-family:'Source Sans 3',sans-serif}
+  .src-badge.nyt{background:#000}
+  .src-badge.ap{background:#c41e3a}
+  .flag{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--g-mid);margin-left:7px}
+  .flag::before{content:'';display:inline-block;width:12px;height:2px;background:var(--g-mid)}
+  .flag.gf{color:var(--gold)}
+  .flag.gf::before{background:var(--gold)}
+  .card-feat h2{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;line-height:1.25;color:var(--td);margin-bottom:10px;margin-top:11px}
+  .card-feat .sum{font-family:'EB Garamond',serif;font-size:15px;color:var(--tm);line-height:1.65;margin-bottom:14px;flex:1}
+  .meta{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--tmut);padding-top:12px;border-top:1px solid var(--brd);flex-wrap:wrap}
+  .dot{width:3px;height:3px;border-radius:50%;background:var(--tmut);flex-shrink:0}
+  .sec-stack{display:flex;flex-direction:column}
+  .card-sm{padding:16px 18px;flex:1;border-bottom:1px solid var(--brd);display:flex;flex-direction:column}
+  .card-sm:last-child{border-bottom:none}
+  .card-sm h3{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;line-height:1.3;color:var(--td);margin-bottom:6px;margin-top:8px}
+  .card-sm .sum{font-family:'EB Garamond',serif;font-size:13px;color:var(--tm);line-height:1.55;margin-bottom:8px;flex:1}
+  .card-sm .meta{padding-top:8px}
+  .more{margin-top:2px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--brd);border-top:none;background:var(--cbg)}
+  .card-md{padding:18px 20px;border-right:1px solid var(--brd);display:flex;flex-direction:column}
+  .card-md:last-child{border-right:none}
+  .card-md h3{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;line-height:1.3;color:var(--td);margin-bottom:6px;margin-top:8px}
+  .card-md .sum{font-family:'EB Garamond',serif;font-size:13px;color:var(--tm);line-height:1.55;margin-bottom:8px;flex:1}
+  .card-md .meta{padding-top:9px;border-top:1px solid var(--brd)}
+  .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 0;gap:14px}
+  .spin{width:26px;height:26px;border:2px solid rgba(26,58,10,.15);border-top-color:var(--g-mid);border-radius:50%;animation:spin .8s linear infinite}
+  .spin.gf{border-top-color:var(--gold)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .load-txt{font-size:13px;color:var(--tmut);font-family:'EB Garamond',serif;font-style:italic}
+  .err-wrap{text-align:center;padding:60px 20px;color:var(--tmut);font-family:'EB Garamond',serif;font-size:16px;line-height:1.8}
+  .src-legend{display:flex;align-items:center;gap:12px;font-size:11px;color:var(--tmut);margin-bottom:14px}
+  .src-legend span{display:flex;align-items:center;gap:5px}
+  footer{background:var(--g);color:rgba(255,255,255,.35);text-align:center;padding:18px 20px;font-size:10px;letter-spacing:.07em;text-transform:uppercase;border-top:3px solid var(--gold);line-height:2.2}
+  footer strong{color:rgba(255,255,255,.65)}
+  footer em{font-style:italic;color:var(--gold-light);text-transform:none;letter-spacing:0;font-family:'EB Garamond',serif;font-size:12px}
+  @media(max-width:680px){
+    .feat-grid{grid-template-columns:1fr}.grid3{grid-template-columns:1fr}
+    .hdr-top,.gnf-bar,.nav{padding-left:16px;padding-right:16px}
+    .main{padding:18px 16px 40px}.hdr-side{display:none}
   }
 </style>
 </head>
 <body>
-
 <header>
-  <div class="header-top">
-    <div class="header-side">
-      <div class="edition">Est. <span>1889</span></div>
-      <div class="header-date-day" id="headerDay"></div>
-      <div class="byline-header">Created by<br><em>Honors U.S. History</em></div>
+  <div class="hdr-top">
+    <div class="hdr-side">
+      <div class="hdr-est">Est. <span>1889</span></div>
+      <div id="hdrDay" style="font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase;margin-top:3px"></div>
+      <div class="hdr-by">Created by<br><em>Honors U.S. History</em></div>
     </div>
-    <div class="masthead">
-      <div class="masthead-rule"></div>
+    <div class="mast">
+      <div class="mast-rule"></div>
       <h1>Thacher U.S. History<br>News Finder</h1>
-      <div class="masthead-sub">The Thacher School &nbsp;·&nbsp; Ojai, California</div>
-      <div class="masthead-rule2"></div>
+      <div class="mast-sub">The Thacher School &nbsp;·&nbsp; Ojai, California</div>
+      <div class="mast-rule" style="margin-top:5px;margin-bottom:0"></div>
     </div>
-    <div class="header-side right">
-      <div class="header-date-full" id="headerDate"></div>
-      <div class="byline-header" style="margin-top:6px; text-align:right;">Honors U.S. History<br><em>Thacher School</em></div>
+    <div class="hdr-side r">
+      <div class="hdr-date" id="hdrDate"></div>
+      <div class="hdr-by" style="text-align:right;margin-top:5px">Honors U.S. History<br><em>Thacher School</em></div>
     </div>
   </div>
-
   <div class="gnf-bar" id="gnfBar">
-    <span class="gnf-label" id="gnfLabel">☀️ Good News Friday</span>
-    <div class="gnf-divider"></div>
+    <span class="gnf-lbl" id="gnfLbl">☀️ Good News Friday</span>
+    <div class="gnf-sep"></div>
     <span class="gnf-desc" id="gnfDesc">Positive stories only</span>
-    <div class="toggle-wrap">
-      <span class="toggle-status" id="toggleStatus">Off</span>
-      <label class="toggle">
-        <input type="checkbox" id="gnfToggle">
-        <div class="toggle-track"></div>
-        <div class="toggle-thumb"></div>
-      </label>
+    <div class="tog-wrap">
+      <span class="tog-st" id="togSt">Off</span>
+      <label class="tog"><input type="checkbox" id="gnfTog"><div class="tog-track"></div><div class="tog-thumb"></div></label>
     </div>
   </div>
-
-  <div class="nav-bar">
-    <span class="nav-label">Section</span>
-    <button class="chip active" data-topic="world" data-label="World News">World News</button>
-    <button class="chip" data-topic="science" data-label="Science & Nature">Science & Nature</button>
-    <button class="chip" data-topic="technology" data-label="Technology">Technology</button>
-    <button class="chip" data-topic="entertainment" data-label="Arts & Culture">Arts & Culture</button>
-    <button class="chip" data-topic="sports" data-label="Sports">Sports</button>
-    <button class="chip" data-topic="environment" data-label="Environment">Environment</button>
-    <button class="chip" data-topic="politics" data-label="Politics">Politics</button>
-    <button class="chip" data-topic="business" data-label="Business">Business</button>
-    <button class="chip" data-topic="health" data-label="Health">Health</button>
-    <button class="chip" data-topic="science" data-label="Space & Astronomy">Space & Astronomy</button>
+  <div class="nav">
+    <span class="nav-lbl">Section</span>
+    <button class="chip active" data-s="home"       data-l="Top Stories">Top Stories</button>
+    <button class="chip"        data-s="world"      data-l="World News">World News</button>
+    <button class="chip"        data-s="science"    data-l="Science">Science</button>
+    <button class="chip"        data-s="technology" data-l="Technology">Technology</button>
+    <button class="chip"        data-s="arts"       data-l="Arts & Culture">Arts & Culture</button>
+    <button class="chip"        data-s="sports"     data-l="Sports">Sports</button>
+    <button class="chip"        data-s="climate"    data-l="Climate">Climate</button>
+    <button class="chip"        data-s="us"         data-l="U.S. Politics">U.S. Politics</button>
+    <button class="chip"        data-s="business"   data-l="Business">Business</button>
+    <button class="chip"        data-s="health"     data-l="Health">Health</button>
   </div>
 </header>
-
-<div class="main" id="mainContent">
-  <div class="loading-wrap">
-    <div class="spinner"></div>
-    <div class="loading-text">Preparing today's edition…</div>
-  </div>
-</div>
-
+<div class="main" id="main"></div>
 <footer>
   <strong>Thacher U.S. History News Finder</strong><br>
   <em>Created by Honors U.S. History Students · The Thacher School</em><br>
-  5025 Thacher Road, Ojai, CA 93023 &nbsp;·&nbsp; Powered by Currents API
+  5025 Thacher Road, Ojai, CA 93023 &nbsp;·&nbsp; The New York Times &amp; AP News
 </footer>
-
 <script>
-  const API_KEY = 'df7TWcXjOrhkfVtO1QusX_Rrhy70GzQedUvuTaYpJ69pVVVr';
+const now=new Date();
+document.getElementById('hdrDate').textContent=now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+document.getElementById('hdrDay').textContent=now.toLocaleDateString('en-US',{weekday:'long'});
 
-  const now = new Date();
-  document.getElementById('headerDate').textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  document.getElementById('headerDay').textContent = now.toLocaleDateString('en-US', { weekday: 'long' });
+let section='home',label='Top Stories',gnfOn=false,busy=false;
 
-  let activeTopic = 'world';
-  let activeLabel = 'World News';
-  let gnfOn = false;
+const gnfBar=document.getElementById('gnfBar'),gnfLbl=document.getElementById('gnfLbl'),
+      gnfDesc=document.getElementById('gnfDesc'),togSt=document.getElementById('togSt'),gnfTog=document.getElementById('gnfTog');
 
-  const gnfToggle = document.getElementById('gnfToggle');
-  const gnfBar = document.getElementById('gnfBar');
-  const gnfLabel = document.getElementById('gnfLabel');
-  const gnfDesc = document.getElementById('gnfDesc');
-  const toggleStatus = document.getElementById('toggleStatus');
+gnfTog.addEventListener('change',()=>{
+  gnfOn=gnfTog.checked;
+  gnfBar.classList.toggle('on',gnfOn);gnfLbl.classList.toggle('on',gnfOn);
+  gnfDesc.classList.toggle('on',gnfOn);togSt.classList.toggle('on',gnfOn);
+  gnfDesc.textContent=gnfOn?'Uplifting and inspiring stories only':'Positive stories only';
+  togSt.textContent=gnfOn?'On':'Off';
+  load();
+});
 
-  gnfToggle.addEventListener('change', () => {
-    gnfOn = gnfToggle.checked;
-    if (gnfOn) {
-      gnfBar.classList.add('on');
-      gnfLabel.classList.add('on');
-      gnfDesc.classList.add('on');
-      gnfDesc.textContent = 'Uplifting and inspiring stories only';
-      toggleStatus.textContent = 'On';
-      toggleStatus.classList.add('on');
-    } else {
-      gnfBar.classList.remove('on');
-      gnfLabel.classList.remove('on');
-      gnfDesc.classList.remove('on');
-      gnfDesc.textContent = 'Positive stories only';
-      toggleStatus.textContent = 'Off';
-      toggleStatus.classList.remove('on');
-    }
-    fetchNews();
-  });
+document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{
+  document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+  c.classList.add('active');section=c.dataset.s;label=c.dataset.l;load();
+}));
 
-  document.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      activeTopic = chip.dataset.topic;
-      activeLabel = chip.dataset.label;
-      fetchNews();
-    });
-  });
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function timeAgo(d){if(!d)return'';const h=Math.floor((Date.now()-new Date(d))/3600000);if(h<1)return'Just now';if(h<24)return h+'h ago';return Math.floor(h/24)+'d ago';}
 
-  function timeAgo(dateStr) {
-    if (!dateStr) return 'Today';
-    const pub = new Date(dateStr);
-    const diffMs = Date.now() - pub.getTime();
-    const diffH = Math.floor(diffMs / 3600000);
-    if (diffH < 1) return 'Just now';
-    if (diffH < 24) return diffH + ' hour' + (diffH > 1 ? 's' : '') + ' ago';
-    const diffD = Math.floor(diffH / 24);
-    return diffD + ' day' + (diffD > 1 ? 's' : '') + ' ago';
+async function load(){
+  if(busy)return;busy=true;
+  const main=document.getElementById('main');
+  main.innerHTML=`<div class="loading"><div class="spin ${gnfOn?'gf':''}"></div><div class="load-txt">${gnfOn?'Curating uplifting stories\u2026':"Fetching today\u2019s edition\u2026"}</div></div>`;
+  try{
+    const res=await fetch('/api/news',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({section,gnf:gnfOn})});
+    if(!res.ok)throw new Error('Server error '+res.status);
+    const arts=await res.json();
+    if(arts.error)throw new Error(arts.error);
+    if(!Array.isArray(arts)||!arts.length)throw new Error('No articles returned');
+    render(arts);
+  }catch(err){
+    main.innerHTML=`<div class="err-wrap">
+      <p style="font-size:18px;font-family:'Playfair Display',serif;color:var(--td);margin-bottom:8px">Unable to load today\u2019s edition.</p>
+      <p style="font-size:13px;font-family:'Source Sans 3',sans-serif;margin-bottom:20px">${esc(err.message)}</p>
+      <button class="ref-btn" onclick="load()" style="margin:0 auto;display:inline-block">\u21bb Try again</button>
+    </div>`;
   }
+  busy=false;
+}
 
-  function cleanDescription(desc) {
-    if (!desc) return '';
-    return desc.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').substring(0, 220) + '…';
-  }
-
-  function filterGoodNews(articles) {
-    const badWords = ['dead', 'death', 'kill', 'killed', 'murder', 'crash', 'war', 'attack', 'shooting', 'disaster', 'flood', 'fire', 'crisis', 'scandal', 'arrest', 'guilty', 'lawsuit', 'explosion', 'violence', 'terror', 'riot', 'protest', 'controversy', 'resign', 'impeach', 'bankrupt', 'collapse', 'fail', 'tragedy', 'victim'];
-    return articles.filter(a => {
-      const text = ((a.title || '') + ' ' + (a.description || '')).toLowerCase();
-      return !badWords.some(w => text.includes(w));
-    });
-  }
-
-  async function fetchNews() {
-    const main = document.getElementById('mainContent');
-    main.innerHTML = `<div class="loading-wrap"><div class="spinner ${gnfOn ? 'gnf' : ''}"></div><div class="loading-text">${gnfOn ? 'Curating uplifting stories…' : 'Preparing today\'s edition…'}</div></div>`;
-
-    const keywords = gnfOn ? 'breakthrough+discovery+achievement+innovation+inspire' : activeTopic;
-    const url = `https://api.currentsapi.services/v1/search?apiKey=${API_KEY}&language=en&keywords=${keywords}&page_size=20`;
-
-    try {
-      const resp = await fetch(url);
-      if (!resp.ok) throw new Error('API error ' + resp.status);
-      const data = await resp.json();
-      let articles = data.news || [];
-
-      if (gnfOn) articles = filterGoodNews(articles);
-      articles = articles.filter(a => a.title && a.title.length > 20).slice(0, 9);
-
-      if (articles.length === 0) {
-        main.innerHTML = '<div class="error-wrap">No articles found for this section. Try another topic.</div>';
-        return;
-      }
-
-      renderArticles(articles);
-    } catch (err) {
-      console.error(err);
-      main.innerHTML = `<div class="error-wrap"><p style="margin-bottom:12px;">Unable to retrieve today's edition.<br><small style="font-size:12px;">${err.message}</small></p><button class="refresh-btn" onclick="fetchNews()" style="margin:0 auto;">↻ Try Again</button></div>`;
-    }
-  }
-
-  function renderArticles(articles) {
-    const main = document.getElementById('mainContent');
-    const isGnf = gnfOn;
-    const featured = articles[0];
-    const secondary = articles.slice(1, 3);
-    const rest = articles.slice(3, 9);
-    const flagClass = isGnf ? 'gnf-flag' : '';
-    const cardClass = isGnf ? 'gnf-card' : '';
-    const divClass = isGnf ? 'divider-gnf' : '';
-
-    let html = '';
-
-    if (isGnf) {
-      html += `<div class="gnf-banner">
-        <div class="gnf-banner-icon">☀️</div>
-        <div class="gnf-banner-text">
-          <h3>Good News Friday Edition</h3>
-          <p>Today's edition features only uplifting, positive, and inspiring stories from around the world.</p>
+function render(arts){
+  const main=document.getElementById('main');
+  const gf=gnfOn,fc=gf?'gf':'',dc=gf?'div-gold':'';
+  const featured=arts[0],sec=arts.slice(1,3),rest=arts.slice(3,9);
+  const badge=a=>`<span class="src-badge ${a.source==='AP'?'ap':'nyt'}">${a.source}</span>`;
+  const secTag=a=>esc(a.subsection||a.section||label);
+  const timePart=a=>a.date?`<div class="dot"></div><span>${timeAgo(a.date)}</span>`:'';
+  const meta=a=>`<div class="meta">${badge(a)}<div class="dot"></div><span>${secTag(a)}</span>${timePart(a)}</div>`;
+  let h='';
+  if(gf)h+=`<div class="gnf-banner"><div class="gnf-icon">☀️</div><div><h3>Good News Friday Edition</h3><p>Only uplifting, positive, and inspiring stories from NYT and AP News.</p></div></div>`;
+  h+=`<div class="src-legend">Sources: <span><span class="src-badge nyt">NYT</span> New York Times</span><span><span class="src-badge ap">AP</span> Associated Press</span></div>`;
+  h+=`<div class="sec-hdr">
+    <span class="sec-title">${gf?'Good News \xb7 ':''}${esc(label)}</span>
+    <span class="sec-sub">${arts.length} stories</span>
+    <button class="ref-btn" onclick="load()">\u21bb Refresh</button>
+  </div>
+  <div class="div-line ${dc}"></div><div class="div-thin"></div>
+  <div class="feat-grid">
+    <div class="feat-main">
+      <a class="card" href="${esc(featured.url)}" target="_blank" rel="noopener">
+        ${featured.img?`<img class="card-img" src="${esc(featured.img)}" alt="" loading="lazy" onerror="this.style.display='none'">`:''}
+        <div class="card-feat">
+          <div>${badge(featured)}<span class="flag ${fc}" style="margin-left:7px">${secTag(featured)}</span></div>
+          <h2>${esc(featured.title)}</h2>
+          <p class="sum">${esc(featured.summary)}</p>
+          ${meta(featured)}
         </div>
-      </div>`;
-    }
-
-    html += `
-      <div class="section-header">
-        <span class="section-title">${isGnf ? 'Good News · ' : ''}${activeLabel}</span>
-        <span class="section-sub">${articles.length} stories</span>
-        <button class="refresh-btn" onclick="fetchNews()">↻ Refresh</button>
-      </div>
-      <div class="divider ${divClass}"></div>
-      <div class="divider-thin"></div>
-      <div class="featured-grid">
-        <div class="featured-main">
-          <a class="card ${cardClass}" href="${featured.url || '#'}" target="_blank" rel="noopener">
-            <div class="card-featured">
-              <div class="topic-flag ${flagClass}">${(featured.category && featured.category[0]) || activeLabel}</div>
-              <h2>${featured.title}</h2>
-              <p class="summary">${cleanDescription(featured.description)}</p>
-              <div class="card-meta">
-                <span class="source-name">${featured.author || 'News'}</span>
-                <div class="meta-dot"></div>
-                <span>${timeAgo(featured.published)}</span>
-              </div>
-            </div>
-          </a>
+      </a>
+    </div>
+    <div class="sec-stack">
+      ${sec.map(a=>`<a class="card" href="${esc(a.url)}" target="_blank" rel="noopener" style="flex:1">
+        <div class="card-sm">
+          <div>${badge(a)}<span class="flag ${fc}" style="font-size:8px;margin-left:6px">${secTag(a)}</span></div>
+          <h3>${esc(a.title)}</h3><p class="sum">${esc(a.summary)}</p>${meta(a)}
         </div>
-        <div class="secondary-stack">
-          ${secondary.map(a => `
-            <a class="card ${cardClass}" href="${a.url || '#'}" target="_blank" rel="noopener" style="flex:1">
-              <div class="card-small">
-                <div class="topic-flag ${flagClass}" style="font-size:9px;">${(a.category && a.category[0]) || activeLabel}</div>
-                <h3>${a.title}</h3>
-                <p class="summary">${cleanDescription(a.description)}</p>
-                <div class="card-meta">
-                  <span class="source-name">${a.author || 'News'}</span>
-                  <div class="meta-dot"></div>
-                  <span>${timeAgo(a.published)}</span>
-                </div>
-              </div>
-            </a>
-          `).join('')}
+      </a>`).join('')}
+    </div>
+  </div>`;
+  if(rest.length)h+=`<div class="more">
+    <div class="div-line ${dc}" style="margin-top:24px"></div><div class="div-thin"></div>
+    <div class="grid3">
+      ${rest.slice(0,6).map(a=>`<a class="card" href="${esc(a.url)}" target="_blank" rel="noopener">
+        <div class="card-md">
+          <div>${badge(a)}<span class="flag ${fc}" style="font-size:8px;margin-left:6px">${secTag(a)}</span></div>
+          <h3>${esc(a.title)}</h3><p class="sum">${esc(a.summary)}</p>${meta(a)}
         </div>
-      </div>`;
+      </a>`).join('')}
+    </div>
+  </div>`;
+  main.innerHTML=h;
+}
 
-    if (rest.length > 0) {
-      html += `
-        <div class="more-section">
-          <div class="divider ${divClass}" style="margin-top:28px;"></div>
-          <div class="divider-thin"></div>
-          <div class="grid-3">
-            ${rest.map(a => `
-              <a class="card ${cardClass}" href="${a.url || '#'}" target="_blank" rel="noopener">
-                <div class="card-medium">
-                  <div class="topic-flag ${flagClass}" style="font-size:9px;">${(a.category && a.category[0]) || activeLabel}</div>
-                  <h3>${a.title}</h3>
-                  <p class="summary">${cleanDescription(a.description)}</p>
-                  <div class="card-meta">
-                    <span class="source-name">${a.author || 'News'}</span>
-                    <div class="meta-dot"></div>
-                    <span>${timeAgo(a.published)}</span>
-                  </div>
-                </div>
-              </a>
-            `).join('')}
-          </div>
-        </div>`;
-    }
-
-    main.innerHTML = html;
-  }
-
-  fetchNews();
+load();
 </script>
 </body>
 </html>
